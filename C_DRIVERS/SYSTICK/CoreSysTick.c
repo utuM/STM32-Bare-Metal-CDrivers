@@ -1,8 +1,9 @@
 /**
   * @file    CoreSysTick.c
   * @author  utuM (Kostyantyn Komarov)
-  * @version 1.0.0a
-  * @date    26.10.19
+  * @version 1.0.1a
+  * @date    26.10.19 (1.0.0a)
+  * @date    31.10.19 (1.0.1a)
   * @brief   System timer driver.
   *          Provides setting up of the Cortex-M SysTick timer using current
   *          system clock frequency value. Driver using the 'CoreRcc' driver
@@ -21,6 +22,7 @@
   *          initialization;
   *          uint64_t SysTick_GetTick() - get current 8-byte ticks amount;
   *          bool Rcc_GetSystemClockInit() - get system clock setting up flag;
+  *          uint32_t SysTick_GetTickLength() - tick time duration;
   *          void SysTick_ResetTick() - resets current ticks amount to 0.
   *          In the driver there are a few global variables that should be
   *          changed. These are:
@@ -32,9 +34,6 @@
   *          configure interruption generating every second;
   *          SYSTICK_MILLISECS_DIV - basic divider for milliseconds; is the
   *          basic one to configure interruption generation every millisecond.
-  *          List of supported MCU models:
-  *          + STM32F103xB.
-  *          Other models will be added in future.
   *          List of supported MCU models:
   *          + STM32F103xB.
   *          Other models will be added in future.
@@ -80,45 +79,44 @@ void SysTick_Handler(void)
   **/
 void SysTick_Init(SysTickStep step, uint16_t units)
 {
-    if (!s_sysTick.m_isInit)
+    // Check if system timer is ready.
+    if (s_sysTick.m_isInit)
     {
         return;
     }
-
+    
     // Read current system clock.
     uint32_t l_ticks = 0U;                 ///< System timer ticks amount for
                                            ///  overloading.
-	uint32_t l_divider = SYSTICK_SECS_DIV; ///< Divider according to time unit.
+    uint32_t l_divider = SYSTICK_SECS_DIV; ///< Divider according to time unit.
 
-    __disable_irq;
     // Calculate frequency divider.
-	for (uint8_t i = 0; i < (uint8_t)s_sysTick.m_stepUnit; i ++)
-	{
-		l_divider /= SYSTICK_MILLISECS_DIV;
-	}
-	// Check if need to limit 'stepSize' value.
-	if (s_sysTick.m_stepSize > MAXIMAL_STEP_SIZE)
-	{
-		s_sysTick.m_stepSize = MAXIMAL_STEP_SIZE;
-	}
-	else if (!s_sysTick.m_stepSize)
-	{
+    for (uint8_t i = 0; i < (uint8_t)s_sysTick.m_stepUnit; i ++)
+    {
+        l_divider /= SYSTICK_MILLISECS_DIV;
+    }
+    // Check if need to limit 'stepSize' value.
+    if (s_sysTick.m_stepSize > MAXIMAL_STEP_SIZE)
+    {
+        s_sysTick.m_stepSize = MAXIMAL_STEP_SIZE;
+    }
+    else if (!s_sysTick.m_stepSize)
+    {
         s_sysTick.m_stepSize = 1;
-	}
-	// Calculate reload value.
-	l_ticks = Rcc_GetSystemClock() / (l_divider / s_sysTick.m_stepSize) - 1;
+    }
+    // Calculate reload value.
+    l_ticks = Rcc_GetSystemClock() / (l_divider / s_sysTick.m_stepSize) - 1;
     // Write reload value into 'SYST_RVR' register (24-bit value only).
     SysTick->LOAD = 0x00FFFFFFU & l_ticks;
     SysTick->VAL  = 0U;
     // Set the interrupt priority.
-    NVIC_SetPriority(SysTick_IRQn, (1 << __NVIC_PRIO_BITS) - 1);
-	// Set system clock as system timer source.
+    NVIC_SetPriority(SysTick_IRQn, (0x01 << __NVIC_PRIO_BITS) - 1);
+    // Set system clock as system timer source.
     SysTick->CTRL |= SysTick_CTRL_CLKSOURCE_Msk;
     // Enabled overload interruption.
     SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
     // Enable system timer.
     SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
-    __enable_irq;
     
     s_sysTick.m_isInit = true;
 }
@@ -135,10 +133,30 @@ uint64_t SysTick_GetTick(void)
     {
         return 0U;
     }
-    else
+    
+	return s_sysTick.m_tick;
+}
+
+/**
+  * @brief  Get tick duration.
+  *         Return the tick time duration after which the interruption is
+  *         toggled.
+  * @param  None.
+  * @retval Tick time length in microseconds.
+  **/
+uint32_t SysTick_GetTickLength(void)
+{
+    // Check if system time is not ready.
+    if (!s_sysTick.m_isInit)
     {
-        return s_sysTick.m_tick;
+        return 0U;
     }
+    // Return tick time duration.
+    if (s_sysTick.m_stepUnit == kTickMicrosecs)
+    {
+        return s_sysTick.m_stepSize;
+    }
+    return (1000U * s_sysTick.m_stepSize);
 }
 
 /**
@@ -152,5 +170,5 @@ void SysTick_ResetTick(void)
     {
         return;
     }
-	s_sysTick.m_tick = 0U;
+    s_sysTick.m_tick = 0U;
 }

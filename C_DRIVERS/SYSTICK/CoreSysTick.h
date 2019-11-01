@@ -1,8 +1,9 @@
 /**
   * @file    CoreSysTick.h
   * @author  utuM (Kostyantyn Komarov)
-  * @version 1.0.0a
-  * @date    26.10.19
+  * @version 1.0.1a
+  * @date    26.10.19 (1.0.0a)
+  * @date    31.10.19 (1.0.1a)
   * @brief   System timer driver.
   *          Provides setting up of the Cortex-M SysTick timer using current
   *          system clock frequency value. Driver using the 'CoreRcc' driver
@@ -21,6 +22,7 @@
   *          initialization;
   *          uint64_t SysTick_GetTick() - get current 8-byte ticks amount;
   *          bool Rcc_GetSystemClockInit() - get system clock setting up flag;
+  *          uint32_t SysTick_GetTickLength() - tick time duration;
   *          void SysTick_ResetTick() - resets current ticks amount to 0.
   *          In the driver there are a few global variables that should be
   *          changed. These are:
@@ -32,9 +34,6 @@
   *          configure interruption generating every second;
   *          SYSTICK_MILLISECS_DIV - basic divider for milliseconds; is the
   *          basic one to configure interruption generation every millisecond.
-  *          List of supported MCU models:
-  *          + STM32F103xB.
-  *          Other models will be added in future.
   *          List of supported MCU models:
   *          + STM32F103xB.
   *          Other models will be added in future.
@@ -54,7 +53,7 @@
   **/
 typedef enum
 {
-	kTickMicrosecs = 0x00, ///< Microseconds.
+    kTickMicrosecs = 0x00, ///< Microseconds.
     kTickMillisecs         ///< Milliseconds.
 } SysTickStep;
 
@@ -76,6 +75,7 @@ extern "C"
 
 void     SysTick_Init(SysTickStep step, uint16_t units);
 uint64_t SysTick_GetTick(void);
+uint32_t SysTick_GetTickLength(void);
 void     SysTick_ResetTick(void);
 
 #ifdef __cplusplus
