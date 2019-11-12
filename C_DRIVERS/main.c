@@ -1,16 +1,12 @@
-#include "main.h"
+#include "RCC/CoreRcc.h"
+#include "SYSTICK/CoreSysTick.h"
+#include "DELAY/CoreDelay.h"
+#include "GPIO/PeriphGpio.h"
+#include "UART/PeriphUart.h"
 
-#include "CoreRcc.h"
-#include "CoreSysTick.h"
-#include "CoreDelay.h"
-#include "PeriphGpio.h"
-
-/**
-  * @brief  The application entry point.
-  * @retval int
-  */
 int main(void)
 {
+  /* USER CODE BEGIN 1 */
   // Test RCC.
   Rcc_InitCore(kClock48MHz);
   // Test SysTick.
@@ -19,19 +15,23 @@ int main(void)
   Gpio_InitInput(kGpioA, kGpio9, kGpioPullDown);
   Gpio_InitInput(kGpioA, kGpio10, kGpioPullUp);
   Gpio_InitInput(kGpioA, kGpio11, kGpioPullDown);
+  Gpio_InitOutput(kGpioB, kGpio6, kGpioPushPull, kGpioOutputMid, 0);
   Gpio_InitOutput(kGpioB, kGpio11, kGpioPushPull, kGpioOutputMid, 1);
-  printf("System tick length is %u ms.\r\n", SysTick_GetTickLength());
-  
-  uint32_t l_counter = 0;
-  while (1)
-  {
-    Gpio_OutputWrite(kGpioB, kGpio11, l_counter % 2);
-	++ l_counter;
-    printf("Input states: %u %u %u\r\n", Gpio_InputRead(kGpioA, kGpio9),
-                                         Gpio_InputRead(kGpioA, kGpio10),
-                                         Gpio_InputRead(kGpioA, kGpio11));
-    
-	// Test delay.
-    Delay_Wait(1000);
+  Gpio_InitOutput(kGpioB, kGpio10, kGpioPushPull, kGpioOutputHigh, 0);
+  // Test UARTs.
+  Uart_Init(kUart1, kUart1TxPA9_RxPA10, kBaud115200);
+  char l_inputBuffer[384] = {0};
+  char l_message[] = "In this article, you'll use Visual Studio to create the "
+                     "traditional \"Hello World!\" program.\r\n";
+  uint16_t l_read = 0;
+  Uart_Send(kUart1, (uint8_t*)l_message, strlen(l_message));
+  while (1) {
+    l_read = Uart_Read(kUart1, (uint8_t*)l_inputBuffer, 384);
+    l_inputBuffer[l_read] = 0x00;
+    if (l_read) {
+        printf("%s", l_inputBuffer);
+        l_read = 0;
+    }
+    Delay_Wait(20);
   }
 }
