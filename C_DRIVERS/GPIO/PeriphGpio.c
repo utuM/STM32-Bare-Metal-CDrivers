@@ -3,7 +3,7 @@
   * @author  utuM (Kostyantyn Komarov)
   * @version 1.0.0a
   * @date    31.10.19
-  * @brief   General purpose input/output driver.
+  * @brief   General purpose input/output (GPIO) driver.
   *          Provides microcontroller pins enabling, disabling and managing.
   *          Initialization processes for any pin mode supported by some
   *          amount of setting for each mode. Input pin mode can be enabled
@@ -17,7 +17,7 @@
   *          So, for example, if You put the value '2' as a value of the
   *          'state' parameter of function 'Gpio_OutputWrite(...)', then
   *          driver will take only LSB bit of this value and it will be '0'.
-  *          List of function:
+  *          List of functions:
   *          void Gpio_InitInput(GpioPort, GpioNumber, GpioPull) - input pin
   *          initialization with port clock source enabling;
   *          void Gpio_InitOutput(GpioPort, GpioNumber, GpioOutput, GpioSpeed,
@@ -153,7 +153,7 @@ static bool Gpio_CheckPin(GPIO_TypeDef* pGpio, GpioNumber pin, GpioMode mode)
 
 /**
   * @brief  GPIO pin 'Input' mode configuring.
-  * @param  port  - GPIO pin pot.
+  * @param  port  - GPIO pin port.
   * @param  pin   - number of the GPIO pin.
   * @param  pull  - input pull option.
   * @retval None.
