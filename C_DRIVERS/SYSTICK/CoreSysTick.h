@@ -17,7 +17,7 @@
   *          interruption should be generated every 500ms, then need to select
   *          the 'kTickMillisecs' for 'm_stepUnit' and define 'm_stepSize' with
   *          value 500.
-  *          List of function:
+  *          List of functions:
   *          void SysTick_Init(SysTickStep, uint16_t) - basic SysTick timer
   *          initialization;
   *          uint64_t SysTick_GetTick() - get current 8-byte ticks amount;
@@ -56,17 +56,6 @@ typedef enum
     kTickMicrosecs = 0x00, ///< Microseconds.
     kTickMillisecs         ///< Milliseconds.
 } SysTickStep;
-
-/**
-  * System timer handler.
-  **/
-typedef struct
-{
-    bool          m_isInit;   ///< Initialization flag.
-    SysTickStep   m_stepUnit; ///< Current step unit.
-    uint16_t      m_stepSize; ///< Amount of units.
-    uint64_t      m_tick;     ///< Current tick value.
-} SysTickHandler;
 
 #ifdef __cplusplus
 extern "C"
