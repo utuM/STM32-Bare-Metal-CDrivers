@@ -1,8 +1,9 @@
 /**
   * @file    CoreRcc.h
   * @author  utuM (Kostyantyn Komarov)
-  * @version 1.0.0a
-  * @date    26.10.19
+  * @version 1.0.1a
+  * @date    26.10.19 (1.0.0a)
+  * @date    02.11.19 (1.0.1a)
   * @brief   System core frequency settings up driver.
   *          Provides setting up system frequency using PLL source only. User
   *          can select preffered frequency to be clocked by using one of the
@@ -12,11 +13,13 @@
   *          clock source need to use one from the 'CoreMcoSource' enumeration
   *          value.
   *          Current version of driver support only 8MHz external crystal.
-  *          List of function:
+  *          List of functions:
   *          void Rcc_InitCore(CoreClock) - basic system clock frequency
   *          initialization function, call it firstly before further managing;
   *          bool Rcc_GetSystemClockInit() - get system clock setting up flag;
   *          uint32_t Rcc_GetSystemClock() - get current system clock frequency;
+  *          uint8_t Rcc_GetApb1Divider() - get APB1 prescaler divider value;
+  *          uint8_t Rcc_GetApb2Divider() - get APB2 prescaler divider value;
   *          void Rcc_InitMco(CoreMcoSource) - MCO initialization function;
   *          bool Rcc_DeInitMco() - MCO disabling function.
   *          In the driver there are a few global variables that should be
@@ -84,19 +87,6 @@ typedef enum
 } CoreMcoSource;
 #endif // MCO_ENABLED == 1
 
-/**
-  * System information structure.
-  **/
-typedef struct
-{
-    bool          m_isSysClkReady; ///< System clock ready flag.
-    uint32_t      m_clock;         ///< Current clock value.
-    bool          m_isMcoEnabled;  ///< MCO enabling flag.
-#if (MCO_ENABLED == 1)
-    CoreMcoSource m_mcoSource;     ///< Current MCO source.
-#endif // MCO_ENABLED == 1
-} SystemInfo;
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -106,6 +96,8 @@ void     Rcc_InitCore(CoreClock clock);
 
 bool     Rcc_GetSystemClockInit(void);
 uint32_t Rcc_GetSystemClock(void);
+uint8_t  Rcc_GetApb1Divider(void);
+uint8_t  Rcc_GetApb2Divider(void);
 
 #if (MCO_ENABLED == 1)
 bool     Rcc_InitMco(CoreMcoSource source);
