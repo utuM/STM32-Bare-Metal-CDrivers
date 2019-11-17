@@ -2,12 +2,12 @@
 
 #include <string.h>
 
-#include "CoreRcc.h"
-#include "CoreSysTick.h"
-#include "CoreDelay.h"
-#include "PeriphGpio.h"
-#include "PeriphUart.h"
-#include "PeriphRtc.h"
+#include "RCC/CoreRcc.h"
+#include "SYSTICK/CoreSysTick.h"
+#include "DELAY/CoreDelay.h"
+#include "GPIO/PeriphGpio.h"
+#include "UART/PeriphUart.h"
+#include "RTC/PeriphRtc.h"
 
 int main(void)
 {
